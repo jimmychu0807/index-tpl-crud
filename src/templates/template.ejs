@@ -1,15 +1,11 @@
-<%
-  const capFirst = s => (s && s[0].toUpperCase() + s.slice(1)) || "";
-%>
-
 <!DOCTYPE html>
 <html lang="en">
 
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= capFirst(repo_name) %> Rustdocs</title>
-    <meta name="description" content="Nothing here." />
+    <title><%= projectName %> Rustdocs</title>
+    <meta name="description" content="<%= projectName %> Rustdocs" />
     <meta name="robots" content="noindex">
     <style>
       body {
@@ -36,17 +32,9 @@
   <body>
     <div class="center-me">
       <div class="content">
-        <h1><%= capFirst(repo_name) %> Rustdocs</h1>
+        <h1><%= projectName %> Rustdocs</h1>
         <section>
-          <ul>
-          <%_ deploy_refs.split(/\s+/).forEach(ref => { _%>
-            <li>
-              <a href="/<%= repo_name _%>/<%= ref _%>"><%- ref -%></a>
-              <%_ if (latest && latest.trim() !== '' && latest === ref) { _%>
-                (<a href="/<%= repo_name _%>/latest">latest</a>)
-              <%_ } _%>
-            </li>
-          <%_ }) _%>
+          <ul id="rustdoc-list" data-gh-repo="<%= ghRepo %>">
           </ul>
         </section>
       </div>
