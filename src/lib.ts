@@ -1,11 +1,11 @@
 // Internal Import
-import { TPL_PATH, CliUpsertOptions } from './consts_types'
+import { TPL_PATH, CliUpsertOptions, CliRmOptions } from './consts_types'
 const { JSDOM } = require('jsdom')
 
 const fs = require('fs')
 const ejs = require('ejs')
 
-function generateIndex (
+export function generateIndex (
   ghRepo: string,
   projectName: string,
   outputPath: string
@@ -15,31 +15,13 @@ function generateIndex (
   fs.writeFileSync(outputPath, output)
 }
 
-async function upsertIndex (
+export function upsertIndex (
   inputPath: string,
   ref: string,
   display: string,
   opts: CliUpsertOptions
-): Promise<void> {
-  if (!fs.existsSync(inputPath)) {
-    throw new Error(`input file ${inputPath} does not exist`)
-  }
-
-  const inputStr = fs.readFileSync(inputPath)
-  const dom = new JSDOM(inputStr)
-  const { document } : { document: Document } = dom.window
-
-  const ul = document.getElementById('rustdoc-list')
-  if (!ul) {
-    throw new Error('\'rustdoc-list\' ID selection returns null')
-  }
-
-  // Get the `data-gh-repo` attribute field`
-  const { ghRepo } = ul.dataset
-  if (!ghRepo) {
-    throw new Error('\'data-gh-repo\' data attribute missing in the <ul/> element')
-  }
-
+): void {
+  const [dom, ul, ghRepo] = preprocess(inputPath)
   const { latest } = opts
 
   // Remove the existing latest alias if needed
@@ -81,13 +63,59 @@ async function upsertIndex (
   fs.writeFileSync(inputPath, dom.serialize())
 }
 
+export function rmIndex (inputPath: string, ref: string, opts: CliRmOptions): void {
+  const [dom, ul, ghRepo] = preprocess(inputPath)
+  const { latest } = opts
+
+  // Check if such <li /> child exists already
+  const children = Array.from(ul.children)
+    .filter((el) => el.children[0]
+      ? el.children[0].getAttribute('href')?.match(new RegExp(`/${ghRepo}/${ref}/?$`, 'i'))
+      : false
+    )
+  // Such element doesn't exist
+  if (children.length === 0) return
+
+  const li = children[0]
+
+  if (latest) {
+    // Aim to remove the latest alias only
+    const latestLi = li.querySelector('#latest')
+    if (latestLi) latestLi.outerHTML = ''
+  } else {
+    // Remove the whole <li /> element
+    li.outerHTML = ''
+  }
+
+  // Save back to the file
+  fs.writeFileSync(inputPath, dom.serialize())
+}
+
+function preprocess (inputPath: string): [any, HTMLElement, string] {
+  if (!fs.existsSync(inputPath)) {
+    throw new Error(`input file ${inputPath} does not exist`)
+  }
+
+  const inputStr = fs.readFileSync(inputPath)
+  const dom = new JSDOM(inputStr)
+  const { document } : { document: Document } = dom.window
+
+  const ul = document.getElementById('rustdoc-list')
+  if (!ul) {
+    throw new Error('\'rustdoc-list\' ID selection returns null')
+  }
+
+  // Get the `data-gh-repo` attribute field`
+  const { ghRepo } = ul.dataset
+  if (!ghRepo) {
+    throw new Error('\'data-gh-repo\' data attribute missing in the <ul/> element')
+  }
+
+  return [dom, ul, ghRepo]
+}
+
 function renderLiInner (repo: string, ref: string, display: string, latest: boolean = false) {
   return latest
     ? `<a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span>`
     : `<a href="/${repo}/${ref}">${display}</a>`
-}
-
-export {
-  generateIndex,
-  upsertIndex
 }

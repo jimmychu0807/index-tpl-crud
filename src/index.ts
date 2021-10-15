@@ -1,6 +1,6 @@
 import { Command } from 'commander'
-import { generateIndex, upsertIndex } from './lib'
-import { CliUpsertOptions } from './consts_types'
+import { generateIndex, upsertIndex, rmIndex } from './lib'
+import { CliUpsertOptions, CliRmOptions } from './consts_types'
 
 const program = new Command()
 program.version('1.0.0')
@@ -19,16 +19,23 @@ program
   .option('-l, --latest', 'alias this ref as the latest')
   .action((inputPath: string, ref: string, display: string, options: CliUpsertOptions) => {
     display ||= ref
-    upsertIndex(inputPath, ref, display, options)
-      .then(() => {})
-      .catch((e: Error) => console.error(e))
+    try {
+      upsertIndex(inputPath, ref, display, options)
+    } catch (err) {
+      console.error(err)
+    }
   })
 
 program
   .command('rm <inputPath> <ref>')
   .description('remove a REF from the index page')
-  .action((inputPath: string, ref: string, display: string) => {
-    console.log(`rm cmd called ${inputPath}, ${ref}`)
+  .option('-l, --latest', 'remove the latest alias from this ref if it has one')
+  .action((inputPath: string, ref: string, options: CliRmOptions) => {
+    try {
+      rmIndex(inputPath, ref, options)
+    } catch (err) {
+      console.error(err)
+    }
   })
 
 program.parse(process.argv)
