@@ -46,10 +46,13 @@ async function upsertIndex (inputPath: string, ref: string, display: string): Pr
   }
 
   // sort the `ul` children
-  Array.from(ul.children).sort((el1, el2) => {
-    if (el1.children[0]!.innerHTML === el2.children[0]!.innerHTML) return 0;
-    return el1.children[0]!.innerHTML >= el2.children[0]!.innerHTML ? 1 : -1;
-  })
+  const sortedLiArr = Array.from(ul.children)
+    .sort((el1, el2) => {
+      if (el1.children[0]!.textContent === el2.children[0]!.textContent) return 0;
+      return (el1.children[0]!.textContent as string) >= (el2.children[0]!.textContent as string) ? 1 : -1;
+    })
+
+  ul.innerHTML = sortedLiArr.map(li => li.outerHTML).join('')
 
   // Save back to the file
   fs.writeFileSync(inputPath, dom.serialize())
