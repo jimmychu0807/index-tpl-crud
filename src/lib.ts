@@ -1,5 +1,5 @@
 // Internal Import
-import { TPL_PATH } from './consts_types'
+import { TPL_PATH, CliUpsertOptions } from './consts_types'
 const { JSDOM } = require('jsdom')
 
 const fs = require('fs')
@@ -15,47 +15,76 @@ function generateIndex (
   fs.writeFileSync(outputPath, output)
 }
 
-async function upsertIndex (inputPath: string, ref: string, display: string): Promise<void> {
-  if (! fs.existsSync(inputPath)) {
-    throw `input file ${inputPath} does not exist`
+async function upsertIndex (
+  inputPath: string,
+  ref: string,
+  display: string,
+  opts: CliUpsertOptions
+): Promise<void> {
+  if (!fs.existsSync(inputPath)) {
+    throw new Error(`input file ${inputPath} does not exist`)
   }
 
   const inputStr = fs.readFileSync(inputPath)
   const dom = new JSDOM(inputStr)
   const { document } : { document: Document } = dom.window
 
-  let ul = document.getElementById('rustdoc-list')
-  if (! ul) {
-    throw `'rustdoc-list' ID selection returns null`
+  const ul = document.getElementById('rustdoc-list')
+  if (!ul) {
+    throw new Error('\'rustdoc-list\' ID selection returns null')
   }
 
+  // Get the `data-gh-repo` attribute field`
   const { ghRepo } = ul.dataset
+  if (!ghRepo) {
+    throw new Error('\'data-gh-repo\' data attribute missing in the <ul/> element')
+  }
+
+  const { latest } = opts
+
+  // Remove the existing latest alias if needed
+  if (latest) {
+    const latestElm = document.getElementById('latest')
+    if (latestElm) latestElm.outerHTML = ''
+  }
+
+  // Check if such <li /> child exists already
   const children = Array.from(ul.children)
-    .filter((el) =>
-      el.children[0]
-        ? el.children[0].getAttribute('href')?.match(new RegExp(`/${ghRepo}/${ref}/?$`, 'i'))
-        : false
+    .filter((el) => el.children[0]
+      ? el.children[0].getAttribute('href')?.match(new RegExp(`/${ghRepo}/${ref}/?$`, 'i'))
+      : false
     )
 
+  // Upsert content in the ul
   if (children.length === 0) {
-    let li: HTMLElement = document.createElement('li')
-    li.innerHTML = `<a href="/${ghRepo}/${ref}">${display}</a>`
+    // Update li
+    const li: HTMLElement = document.createElement('li')
+    li.innerHTML = renderLiInner(ghRepo, ref, display, latest)
     ul.append(li)
   } else {
-    children[0].innerHTML = `<a href="/${ghRepo}/${ref}">${display}</a>`
+    // Insert li
+    children[0].innerHTML = renderLiInner(ghRepo, ref, display, latest)
   }
 
   // sort the `ul` children
   const sortedLiArr = Array.from(ul.children)
     .sort((el1, el2) => {
-      if (el1.children[0]!.textContent === el2.children[0]!.textContent) return 0;
-      return (el1.children[0]!.textContent as string) >= (el2.children[0]!.textContent as string) ? 1 : -1;
+      if (el1.children[0]!.textContent === el2.children[0]!.textContent) return 0
+      return (el1.children[0]!.textContent as string) >= (el2.children[0]!.textContent as string)
+        ? 1
+        : -1
     })
 
   ul.innerHTML = sortedLiArr.map(li => li.outerHTML).join('')
 
   // Save back to the file
   fs.writeFileSync(inputPath, dom.serialize())
+}
+
+function renderLiInner (repo: string, ref: string, display: string, latest: boolean = false) {
+  return latest
+    ? `<a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span>`
+    : `<a href="/${repo}/${ref}">${display}</a>`
 }
 
 export {

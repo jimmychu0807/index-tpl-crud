@@ -1,5 +1,6 @@
 import { Command } from 'commander'
 import { generateIndex, upsertIndex } from './lib'
+import { CliUpsertOptions } from './consts_types'
 
 const program = new Command()
 program.version('1.0.0')
@@ -15,9 +16,10 @@ program
 program
   .command('upsert <inputPath> <ref> [display]')
   .description('upsert a REF into the index page')
-  .action((inputPath: string, ref: string, display: string) => {
+  .option('-l, --latest', 'alias this ref as the latest')
+  .action((inputPath: string, ref: string, display: string, options: CliUpsertOptions) => {
     display ||= ref
-    upsertIndex(inputPath, ref, display)
+    upsertIndex(inputPath, ref, display, options)
       .then(() => {})
       .catch((e: Error) => console.error(e))
   })
