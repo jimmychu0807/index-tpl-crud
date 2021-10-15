@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { generateIndex } from './lib'
+import { generateIndex, upsertIndex } from './lib'
 
 const program = new Command()
 program.version('1.0.0')
@@ -16,7 +16,10 @@ program
   .command('upsert <inputPath> <ref> [display]')
   .description('upsert a REF into the index page')
   .action((inputPath: string, ref: string, display: string) => {
-    console.log(`upsert cmd called ${inputPath}, ${ref}, ${display}`)
+    display ||= ref
+    upsertIndex(inputPath, ref, display)
+      .then(() => {})
+      .catch((e: Error) => console.error(e))
   })
 
 program
