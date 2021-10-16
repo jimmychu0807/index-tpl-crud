@@ -22,6 +22,7 @@ export function upsertIndex (
   opts: CliUpsertOptions
 ): void {
   const [dom, ul, ghRepo] = preprocess(inputPath)
+  const { document } : { document: Document } = dom.window
   const { latest } = opts
 
   // Remove the existing latest alias if needed
@@ -51,10 +52,10 @@ export function upsertIndex (
   // sort the `ul` children
   const sortedLiArr = Array.from(ul.children)
     .sort((el1, el2) => {
-      if (el1.children[0]!.textContent === el2.children[0]!.textContent) return 0
-      return (el1.children[0]!.textContent as string) >= (el2.children[0]!.textContent as string)
-        ? 1
-        : -1
+      const textEl1 = el1.children[0]!.textContent!.toLowerCase()
+      const textEl2 = el2.children[0]!.textContent!.toLowerCase()
+      if (textEl1 === textEl2) return 0
+      return textEl1 >= textEl2 ? 1 : -1
     })
 
   ul.innerHTML = sortedLiArr.map(li => li.outerHTML).join('')
@@ -65,6 +66,7 @@ export function upsertIndex (
 
 export function rmIndex (inputPath: string, ref: string, opts: CliRmOptions): void {
   const [dom, ul, ghRepo] = preprocess(inputPath)
+  const { document } : { document: Document } = dom.window
   const { latest } = opts
 
   // Check if such <li /> child exists already

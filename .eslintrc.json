@@ -1,5 +1,6 @@
 {
   "env": {
+    "browser": true,
     "es2021": true,
     "node": true
   },
@@ -15,5 +16,13 @@
     "@typescript-eslint"
   ],
   "rules": {
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
 }
