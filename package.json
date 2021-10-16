@@ -6,14 +6,17 @@
   "packageManager": "yarn@3.0.2",
   "main": "src/index.js",
   "scripts": {
-    "dev": "ts-node ./src/index.ts",
-    "build": "tsc",
-    "start": "node ./bin/index.js",
-    "lint": "eslint"
+    "build": "rimraf dist/ && tsc --build",
+    "dev": "ts-node src/index.ts",
+    "dev:debug": "yarn build; node --inspect-brk dist/index.js",
+    "start": "node dist/index.js",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src"
   },
   "dependencies": {
     "@types/node": "^16.10.5",
-    "commander": "^8.2.0"
+    "commander": "^8.2.0",
+    "ejs": "^3.1.6",
+    "jsdom": "^18.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -23,6 +26,7 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "rimraf": "^3.0.2",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"
   }
