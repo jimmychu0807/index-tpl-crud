@@ -1,8 +1,7 @@
 {
-  "name": "@jimmychu0807/index-tpl-crud",
-  "version": "1.0.0",
+  "name": "@jimmychu0807/index--tpl-crud",
+  "version": "0.0.2",
   "description": "Script to update index.html of Parity projects that publish their rustdocs in github.",
-  "private": false,
   "packageManager": "yarn@3.0.2",
   "main": "src/index.js",
   "homepage": "https://github.com/jimmychu0807/index-tpl-crud",
@@ -10,16 +9,19 @@
     "url": "git+https://github.com/jimmychu0807/index-tpl-crud.git",
     "type": "git"
   },
-  "bin": {
-    "index-tpl-crud": "dist/index.js"
-  },
+  "bin": "dist/index.js",
+  "files": [
+    "dist/**/*"
+  ],
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
   "license": "WTFPL",
   "scripts": {
-    "build": "rimraf dist/ && tsc --build",
+    "tsc:build": "tsc --build --clean && tsc --build",
+    "copyfiles": "cp -r src/templates dist",
+    "build": "yarn tsc:build; yarn copyfiles",
     "dev": "ts-node src/index.ts",
     "dev:debug": "yarn build; node --inspect-brk dist/index.js",
-    "start": "node dist/index.js",
+    "start": "dist/index.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src"
   },
   "dependencies": {
@@ -29,6 +31,7 @@
     "jsdom": "^18.0.0"
   },
   "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -36,7 +39,6 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "rimraf": "^3.0.2",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"
   },

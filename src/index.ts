@@ -1,9 +1,11 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander'
 import { generateIndex, upsertIndex, rmIndex } from './lib'
 import { CliUpsertOptions, CliRmOptions } from './consts_types'
 
 const program = new Command()
-program.version('1.0.0')
+program.version('0.0.0-0')
 
 program
   .command('init <ghRepo> <projectName> [outputPath]')

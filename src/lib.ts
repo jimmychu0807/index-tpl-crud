@@ -66,7 +66,6 @@ export function upsertIndex (
 
 export function rmIndex (inputPath: string, ref: string, opts: CliRmOptions): void {
   const [dom, ul, ghRepo] = preprocess(inputPath)
-  const { document } : { document: Document } = dom.window
   const { latest } = opts
 
   // Check if such <li /> child exists already
