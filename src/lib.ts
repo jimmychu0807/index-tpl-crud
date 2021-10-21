@@ -1,7 +1,11 @@
+// Load order is important here. Need to load `jsdom` and `jsdom-global` first, then `cash-dom`
+// can be used, as it expects a browser environment with `window` and `document`.
+const { JSDOM } = require('jsdom')
+require('jsdom-global')()
+import $, { Cash } from 'cash-dom'
+
 // Internal Import
 import { TPL_PATH, CliUpsertOptions, CliRmOptions } from './consts_types'
-import $, { Cash } from 'cash-dom'
-const { JSDOM } = require('jsdom')
 
 const fs = require('fs')
 const ejs = require('ejs')
