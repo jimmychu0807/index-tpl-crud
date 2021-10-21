@@ -1,9 +1,14 @@
 // Internal Import
 import { TPL_PATH, CliUpsertOptions, CliRmOptions } from './consts_types'
+import $, { Cash } from 'cash-dom'
 const { JSDOM } = require('jsdom')
 
 const fs = require('fs')
 const ejs = require('ejs')
+
+// Constant definition
+const RUSTDOC_LIST_ID = '#rustdoc-list'
+const LATEST_DOM_ID = '#latest'
 
 export function generateIndex (
   ghRepo: string,
@@ -21,102 +26,80 @@ export function upsertIndex (
   display: string,
   opts: CliUpsertOptions
 ): void {
-  const [dom, ul, ghRepo] = preprocess(inputPath)
-  const { document } : { document: Document } = dom.window
+  const [dom, collection] = preprocess(inputPath)
   const { latest } = opts
+  const ghRepo = getRepo(collection)
 
   // Remove the existing latest alias if needed
   if (latest) {
-    const latestElm = document.getElementById('latest')
-    if (latestElm) latestElm.outerHTML = ''
+    $(LATEST_DOM_ID, collection).each((ind, el) => { $(el).html('') })
   }
 
   // Check if such <li /> child exists already
-  const children = Array.from(ul.children)
-    .filter((el) => el.children[0]
-      ? el.children[0].getAttribute('href')?.match(new RegExp(`/${ghRepo}/${ref}/?$`, 'i'))
-      : false
-    )
+  const ul = $(`ul#${RUSTDOC_LIST_ID}`, collection).first()
+  const children = ul.children('li').filter((ind, li) =>
+    $(li).filter(`a[href$="/${ghRepo}/${regexpEscape(ref)}"]`).length > 0
+  )
 
   // Upsert content in the ul
-  if (children.length === 0) {
-    // Update li
-    const li: HTMLElement = document.createElement('li')
-    li.innerHTML = renderLiInner(ghRepo, ref, display, latest)
-    ul.append(li)
-  } else {
-    // Insert li
-    children[0].innerHTML = renderLiInner(ghRepo, ref, display, latest)
-  }
+  children.length === 0
+    ? ul.append(renderLiInner(ghRepo, ref, display, latest))
+    : children.replaceWith(renderLiInner(ghRepo, ref, display, latest))
 
   // sort the `ul` children
-  const sortedLiArr = Array.from(ul.children)
+  const sortedLiArr = Array.from(ul.get(0)!.children)
     .sort((el1, el2) => {
-      const textEl1 = el1.children[0]!.textContent!.toLowerCase()
-      const textEl2 = el2.children[0]!.textContent!.toLowerCase()
-      if (textEl1 === textEl2) return 0
-      return textEl1 >= textEl2 ? 1 : -1
+      const textEl1 = $(el1).text().toLowerCase()
+      const textEl2 = $(el2).text().toLowerCase()
+      return textEl1 === textEl2
+        ? 0
+        : textEl1 >= textEl2 ? 1 : -1
     })
 
-  ul.innerHTML = sortedLiArr.map(li => li.outerHTML).join('')
-
+  ul.html(sortedLiArr.map(li => li.outerHTML).join(''))
   // Save back to the file
   fs.writeFileSync(inputPath, dom.serialize())
 }
 
 export function rmIndex (inputPath: string, ref: string, opts: CliRmOptions): void {
-  const [dom, ul, ghRepo] = preprocess(inputPath)
+  const [dom, collection] = preprocess(inputPath)
   const { latest } = opts
+  const ghRepo = getRepo(collection)
 
   // Check if such <li /> child exists already
-  const children = Array.from(ul.children)
-    .filter((el) => el.children[0]
-      ? el.children[0].getAttribute('href')?.match(new RegExp(`/${ghRepo}/${ref}/?$`, 'i'))
-      : false
-    )
-  // Such element doesn't exist
-  if (children.length === 0) return
-
-  const li = children[0]
-
-  if (latest) {
-    // Aim to remove the latest alias only
-    const latestLi = li.querySelector('#latest')
-    if (latestLi) latestLi.outerHTML = ''
-  } else {
-    // Remove the whole <li /> element
-    li.outerHTML = ''
-  }
+  const ul = $(`ul#${RUSTDOC_LIST_ID}`, collection).first()
+  latest
+    ? ul.children(LATEST_DOM_ID).html('')
+    : ul.children(`li a[href$="/${ghRepo}/${regexpEscape(ref)}"]`).html('')
 
   // Save back to the file
   fs.writeFileSync(inputPath, dom.serialize())
 }
 
-function preprocess (inputPath: string): [any, HTMLElement, string] {
+function preprocess (inputPath: string): [any, Cash] {
   if (!fs.existsSync(inputPath)) {
     throw new Error(`input file ${inputPath} does not exist`)
   }
 
   const inputStr = fs.readFileSync(inputPath)
-  const dom = new JSDOM(inputStr)
-  const { document } : { document: Document } = dom.window
+  return [new JSDOM(inputStr), $(inputStr)]
+}
 
-  const ul = document.getElementById('rustdoc-list')
-  if (!ul) {
-    throw new Error('\'rustdoc-list\' ID selection returns null')
+function getRepo (collection: Cash): string {
+  const selected = $(RUSTDOC_LIST_ID, collection)
+  if (!selected || selected.length === 0) {
+    throw new Error(`Input html doesn't contain DOM ID: ${RUSTDOC_LIST_ID}`)
   }
 
-  // Get the `data-gh-repo` attribute field`
-  const { ghRepo } = ul.dataset
-  if (!ghRepo) {
-    throw new Error('\'data-gh-repo\' data attribute missing in the <ul/> element')
-  }
-
-  return [dom, ul, ghRepo]
+  return $(selected[0]).data('gh-repo')
 }
 
 function renderLiInner (repo: string, ref: string, display: string, latest: boolean = false) {
   return latest
     ? `<a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span>`
     : `<a href="/${repo}/${ref}">${display}</a>`
+}
+
+function regexpEscape (val: string): string {
+  return val.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
 }

@@ -91,6 +91,7 @@ __metadata:
     "@types/node": ^16.10.5
     "@typescript-eslint/eslint-plugin": ^5.0.0
     "@typescript-eslint/parser": ^5.0.0
+    cash-dom: ^8.1.0
     commander: ^8.2.0
     ejs: ^3.1.6
     eslint: ^7.32.0
@@ -527,6 +528,13 @@ __metadata:
   version: 3.1.0
   resolution: "callsites@npm:3.1.0"
   checksum: 072d17b6abb459c2ba96598918b55868af677154bec7e73d222ef95a8fdb9bbf7dae96a8421085cdad8cd190d86653b5b6dc55a4484f2e5b2e27d5e0c3fc15b3
+  languageName: node
+  linkType: hard
+
+"cash-dom@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "cash-dom@npm:8.1.0"
+  checksum: 8074654180abc72ccab1dfba5943eb90b8ef37ce764c873d8ef61139f5c420caf1fb4246f5d475925319105a4a97678d5998b26369ba127f9e55276c1cf99f57
   languageName: node
   linkType: hard
 
