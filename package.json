@@ -21,19 +21,19 @@
     "build": "yarn tsc:build; yarn copyfiles",
     "dev": "ts-node src/index.ts",
     "dev:debug": "yarn build; node --inspect-brk dist/index.js",
-    "start": "dist/index.js",
+    "start": "node dist/index.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src"
   },
   "dependencies": {
     "@types/node": "^16.10.5",
-    "cash-dom": "^8.1.0",
     "commander": "^8.2.0",
     "ejs": "^3.1.6",
-    "jsdom": "^18.0.0",
-    "jsdom-global": "^3.0.2"
+    "jquery": "^3.6.0",
+    "jsdom": "^18.0.0"
   },
   "devDependencies": {
     "@tsconfig/node14": "^1.0.1",
+    "@types/jquery": "^3.5.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

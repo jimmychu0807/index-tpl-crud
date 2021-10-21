@@ -1,11 +1,10 @@
 // Load order is important here. Need to load `jsdom` and `jsdom-global` first, then `cash-dom`
 // can be used, as it expects a browser environment with `window` and `document`.
 const { JSDOM } = require('jsdom')
-require('jsdom-global')()
-import $, { Cash } from 'cash-dom'
+import jQueryFactory = require('jquery')
 
 // Internal Import
-import { TPL_PATH, CliUpsertOptions, CliRmOptions } from './consts_types'
+import { TPL_PATH, CliUpsertOptions } from './consts_types'
 
 const fs = require('fs')
 const ejs = require('ejs')
@@ -30,25 +29,25 @@ export function upsertIndex (
   display: string,
   opts: CliUpsertOptions
 ): void {
-  const [dom, collection] = preprocess(inputPath)
+  const [jsdom, $] = preprocess(inputPath)
   const { latest } = opts
-  const ghRepo = getRepo(collection)
+  const ghRepo: string = $(RUSTDOC_LIST_ID).data('gh-repo')
 
   // Remove the existing latest alias if needed
-  if (latest) {
-    $(LATEST_DOM_ID, collection).each((ind, el) => { $(el).html('') })
+  if (latest && $(LATEST_DOM_ID).length > 0) {
+    $(LATEST_DOM_ID).each((ind, el) => { el.outerHTML = '' })
   }
 
   // Check if such <li /> child exists already
-  const ul = $(`ul#${RUSTDOC_LIST_ID}`, collection).first()
+  const ul = $(RUSTDOC_LIST_ID).first()
   const children = ul.children('li').filter((ind, li) =>
-    $(li).filter(`a[href$="/${ghRepo}/${regexpEscape(ref)}"]`).length > 0
+    $(li).children(`a[href$="/${ghRepo}/${ref}"]`).length > 0
   )
 
   // Upsert content in the ul
   children.length === 0
-    ? ul.append(renderLiInner(ghRepo, ref, display, latest))
-    : children.replaceWith(renderLiInner(ghRepo, ref, display, latest))
+    ? ul.append(renderLi(ghRepo, ref, display, latest))
+    : children.replaceWith(renderLi(ghRepo, ref, display, latest))
 
   // sort the `ul` children
   const sortedLiArr = Array.from(ul.get(0)!.children)
@@ -62,48 +61,37 @@ export function upsertIndex (
 
   ul.html(sortedLiArr.map(li => li.outerHTML).join(''))
   // Save back to the file
-  fs.writeFileSync(inputPath, dom.serialize())
+  fs.writeFileSync(inputPath, jsdom.serialize())
 }
 
-export function rmIndex (inputPath: string, ref: string, opts: CliRmOptions): void {
-  const [dom, collection] = preprocess(inputPath)
-  const { latest } = opts
-  const ghRepo = getRepo(collection)
+export function rmIndex (inputPath: string, ref: string): void {
+  const [jsdom, $] = preprocess(inputPath)
+  const ghRepo: string = $(RUSTDOC_LIST_ID).data('gh-repo')
 
   // Check if such <li /> child exists already
-  const ul = $(`ul#${RUSTDOC_LIST_ID}`, collection).first()
-  latest
-    ? ul.children(LATEST_DOM_ID).html('')
-    : ul.children(`li a[href$="/${ghRepo}/${regexpEscape(ref)}"]`).html('')
+  const ul = $(RUSTDOC_LIST_ID).first()
+  const children = ul.children('li').filter((ind, li) =>
+    $(li).children(`a[href$="/${ghRepo}/${ref}"]`).length > 0
+  )
 
+  children.each((ind, li) => { li.outerHTML = '' })
   // Save back to the file
-  fs.writeFileSync(inputPath, dom.serialize())
+  fs.writeFileSync(inputPath, jsdom.serialize())
 }
 
-function preprocess (inputPath: string): [any, Cash] {
+function preprocess (inputPath: string): [any, JQueryStatic] {
   if (!fs.existsSync(inputPath)) {
     throw new Error(`input file ${inputPath} does not exist`)
   }
 
   const inputStr = fs.readFileSync(inputPath)
-  return [new JSDOM(inputStr), $(inputStr)]
+  const jsdom = new JSDOM(inputStr);
+  const jQuery = jQueryFactory(jsdom.window, true)
+  return [jsdom, jQuery]
 }
 
-function getRepo (collection: Cash): string {
-  const selected = $(RUSTDOC_LIST_ID, collection)
-  if (!selected || selected.length === 0) {
-    throw new Error(`Input html doesn't contain DOM ID: ${RUSTDOC_LIST_ID}`)
-  }
-
-  return $(selected[0]).data('gh-repo')
-}
-
-function renderLiInner (repo: string, ref: string, display: string, latest: boolean = false) {
+function renderLi (repo: string, ref: string, display: string, latest: boolean = false) {
   return latest
-    ? `<a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span>`
-    : `<a href="/${repo}/${ref}">${display}</a>`
-}
-
-function regexpEscape (val: string): string {
-  return val.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+    ? `<li><a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span></li>`
+    : `<li><a href="/${repo}/${ref}">${display}</a></li>`
 }

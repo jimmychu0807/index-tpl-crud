@@ -2,7 +2,7 @@
 
 import { Command } from 'commander'
 import { generateIndex, upsertIndex, rmIndex } from './lib'
-import { CliUpsertOptions, CliRmOptions } from './consts_types'
+import { CliUpsertOptions } from './consts_types'
 
 const program = new Command()
 program.version('0.0.0-0')
@@ -31,10 +31,9 @@ program
 program
   .command('rm <inputPath> <ref>')
   .description('remove a REF from the index page')
-  .option('-l, --latest', 'remove the latest alias from this ref if it has one')
-  .action((inputPath: string, ref: string, options: CliRmOptions) => {
+  .action((inputPath: string, ref: string) => {
     try {
-      rmIndex(inputPath, ref, options)
+      rmIndex(inputPath, ref)
     } catch (err) {
       console.error(err)
     }
