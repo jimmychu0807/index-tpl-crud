@@ -1,6 +1,6 @@
 {
   "name": "@jimmychu0807/index-tpl-crud",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Script to update index.html of Parity projects that publish their rustdocs in github.",
   "packageManager": "yarn@3.0.2",
   "main": "src/index.js",

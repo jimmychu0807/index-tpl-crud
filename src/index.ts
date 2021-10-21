@@ -2,10 +2,10 @@
 
 import { Command } from 'commander'
 import { generateIndex, upsertIndex, rmIndex } from './lib'
-import { CliUpsertOptions } from './consts_types'
+import { CliUpsertOptions, VERSION } from './consts_types'
 
 const program = new Command()
-program.version('0.0.0-0')
+program.version(VERSION)
 
 program
   .command('init <ghRepo> <projectName> [outputPath]')

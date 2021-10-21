@@ -1,11 +1,10 @@
 // Load order is important here. Need to load `jsdom` and `jsdom-global` first, then `cash-dom`
 // can be used, as it expects a browser environment with `window` and `document`.
-const { JSDOM } = require('jsdom')
 import jQueryFactory = require('jquery')
-
 // Internal Import
 import { TPL_PATH, CliUpsertOptions } from './consts_types'
 
+const { JSDOM } = require('jsdom')
 const fs = require('fs')
 const ejs = require('ejs')
 
@@ -85,7 +84,7 @@ function preprocess (inputPath: string): [any, JQueryStatic] {
   }
 
   const inputStr = fs.readFileSync(inputPath)
-  const jsdom = new JSDOM(inputStr);
+  const jsdom = new JSDOM(inputStr)
   const jQuery = jQueryFactory(jsdom.window, true)
   return [jsdom, jQuery]
 }
