@@ -9,7 +9,7 @@ import ejs = require('ejs')
 import { TPL_PATH, CliUpsertOptions } from './consts_types'
 
 // Constant definition
-const { JSDOM } = jsdomOrigin;
+const { JSDOM } = jsdomOrigin
 const RUSTDOC_LIST_ID = '#rustdoc-list'
 const LATEST_DOM_ID = '#latest'
 
@@ -50,7 +50,7 @@ export function upsertIndex (
     : children.replaceWith(renderLi(ghRepo, ref, display, latest))
 
   // sort the `ul` children
-  const sortedLiArr = Array.from(ul.get(0)!.children)
+  const sortedLiArr = Array.from((ul.get(0) as HTMLElement).children)
     .sort((el1, el2) => {
       const textEl1 = $(el1).text().toLowerCase()
       const textEl2 = $(el2).text().toLowerCase()
@@ -79,7 +79,7 @@ export function rmIndex (inputPath: string, ref: string): void {
   fs.writeFileSync(inputPath, jsdom.serialize())
 }
 
-function preprocess (inputPath: string): [any, JQueryStatic] {
+function preprocess (inputPath: string): [jsdomOrigin.JSDOM, JQueryStatic] {
   if (!fs.existsSync(inputPath)) {
     throw new Error(`input file ${inputPath} does not exist`)
   }
@@ -90,7 +90,7 @@ function preprocess (inputPath: string): [any, JQueryStatic] {
   return [jsdom, jQuery]
 }
 
-function renderLi (repo: string, ref: string, display: string, latest: boolean = false): string {
+function renderLi (repo: string, ref: string, display: string, latest = false): string {
   return latest
     ? `<li><a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span></li>`
     : `<li><a href="/${repo}/${ref}">${display}</a></li>`

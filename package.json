@@ -16,13 +16,14 @@
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
   "license": "WTFPL",
   "scripts": {
-    "tsc:build": "tsc --build --clean && tsc --build",
-    "copyfiles": "cp -r src/templates dist",
-    "build": "yarn tsc:build; yarn copyfiles",
-    "dev": "ts-node src/index.ts",
-    "dev:debug": "yarn build; node --inspect-brk dist/index.js",
-    "start": "node dist/index.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx src"
+    "clean": "rm -rf dist",
+    "start": "yarn ts-node src/index.ts",
+    "debug": "yarn build; node --inspect-brk dist/index.js",
+    "lint": "yarn eslint src/ --ext .js,.jsx,.ts,.tsx",
+    "test": "yarn jest",
+    "build": "yarn tsc",
+    "esbuild-node": "yarn esbuild src/index.ts --minify --bundle --platform=node --sourcemap=external --outfile=dist/esbuild/index.js",
+    "build:all": "yarn clean && yarn build && yarn esbuild-node"
   },
   "dependencies": {
     "commander": "^8.2.0",
@@ -33,16 +34,20 @@
   "devDependencies": {
     "@tsconfig/node14": "^1.0.1",
     "@types/ejs": "^3.1.0",
+    "@types/jest": "^27.0.2",
     "@types/jquery": "^3.5.8",
     "@types/jsdom": "^16.2.13",
     "@types/node": "^14.17.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "esbuild": "^0.13.10",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"
   },
