@@ -53,7 +53,7 @@ describe('Testing `upsertIndex`...', () => {
   })
   afterAll(() => { checkExistsAndUnlink(outPath) })
 
-  test('insert an <li> elements', () => {
+  test('insert an <li/> elements', () => {
     const ref = refsAndDisplay[0][0];
     const display = refsAndDisplay[0][1];
 
@@ -131,7 +131,7 @@ describe('Testing `rmIndex`...', () => {
   })
   afterAll(() => { checkExistsAndUnlink(outPath) })
 
-  test('remove an <li> elements', () => {
+  test('remove an <li/> elements', () => {
     refsAndDisplay.forEach(([ref, display]) => {
       upsertIndex(outPath, ref, display, { latest: true })
     })
