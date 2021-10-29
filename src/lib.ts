@@ -1,15 +1,13 @@
 // Load order is important here. Need to load `jsdom` and `jsdom-global` first, then `cash-dom`
 // can be used, as it expects a browser environment with `window` and `document`.
-import jQueryFactory = require('jquery')
-import jsdomOrigin = require('jsdom')
 import fs = require('fs')
 import ejs = require('ejs')
 
 // Internal Import
+import { preprocess } from './utils'
 import { TPL_PATH, CliUpsertOptions } from './consts_types'
 
 // Constant definition
-const { JSDOM } = jsdomOrigin
 const RUSTDOC_LIST_ID = '#rustdoc-list'
 const LATEST_DOM_ID = '#latest'
 
@@ -77,17 +75,6 @@ export function rmIndex (inputPath: string, ref: string): void {
   children.each((_ind, li) => { li.outerHTML = '' })
   // Save back to the file
   fs.writeFileSync(inputPath, jsdom.serialize())
-}
-
-function preprocess (inputPath: string): [jsdomOrigin.JSDOM, JQueryStatic] {
-  if (!fs.existsSync(inputPath)) {
-    throw new Error(`input file ${inputPath} does not exist`)
-  }
-
-  const inputStr = fs.readFileSync(inputPath)
-  const jsdom = new JSDOM(inputStr)
-  const jQuery = jQueryFactory(jsdom.window as unknown as Window, true)
-  return [jsdom, jQuery]
 }
 
 function renderLi (repo: string, ref: string, display: string, latest = false): string {
