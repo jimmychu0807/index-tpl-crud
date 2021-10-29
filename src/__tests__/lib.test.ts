@@ -3,8 +3,7 @@ import fs = require('fs')
 
 // Module to actually test
 import {
-  generateIndex, upsertIndex,
-  rmIndex as _rmIndex
+  generateIndex, upsertIndex, rmIndex
 } from '../lib'
 
 import { preprocess } from '../utils'
@@ -17,6 +16,7 @@ const refsAndDisplay = [
   ['v3+monthly-2021-09+1', 'monthly 2021-09'],
   ['v3+monthly-2021-11', 'monthly 2021-11'],
 ]
+const id = '#rustdoc-list'
 
 const checkExistsAndUnlink = (outPath: string): void => {
   if (fs.existsSync(outPath)) fs.unlinkSync(outPath)
@@ -56,7 +56,6 @@ describe('Testing `upsertIndex`...', () => {
   test('insert an <li> elements', () => {
     const ref = refsAndDisplay[0][0];
     const display = refsAndDisplay[0][1];
-    const id = '#rustdoc-list'
 
     upsertIndex(outPath, ref, ref, { latest: false })
 
@@ -98,8 +97,6 @@ describe('Testing `upsertIndex`...', () => {
   })
 
   test('insert multiple <li/> elements', () => {
-    const id = '#rustdoc-list'
-
     refsAndDisplay.forEach(([ref, display]) => {
       upsertIndex(outPath, ref, display, { latest: false })
     })
@@ -124,5 +121,66 @@ describe('Testing `upsertIndex`...', () => {
 
     // display should be in sorted order
     expect(aDisplay).toEqual(display.sort())
+  })
+})
+
+describe('Testing `rmIndex`...', () => {
+  beforeEach(() => {
+    checkExistsAndUnlink(outPath)
+    generateIndex(projectRepo, projectTitle, outPath)
+  })
+  afterAll(() => { checkExistsAndUnlink(outPath) })
+
+  test('remove an <li> elements', () => {
+    refsAndDisplay.forEach(([ref, display]) => {
+      upsertIndex(outPath, ref, display, { latest: true })
+    })
+
+    const [, $] = preprocess(outPath)
+
+    // There should be three <li/> elements, in sorted order
+    let currLiLen = $(id).find('li').length
+    const refs = refsAndDisplay.map(el => el[0])
+    expect(currLiLen).toEqual(refs.length)
+
+    // Remove once
+    rmIndex(outPath, refs[0])
+
+    const [, jq] = preprocess(outPath)
+
+    let $a = jq(id).find('li a')
+    let aRefs = $a.toArray().map(a => $(a).attr('href'))
+    let newLiLen = jq(id).find('li').length
+
+    expect(newLiLen).toEqual(currLiLen - 1)
+    expect(aRefs).not.toContain(`/${projectRepo}/${refs[0]}`)
+    currLiLen -= 1
+
+    // Remove twice
+    rmIndex(outPath, refs[1])
+
+    const [, jq2] = preprocess(outPath)
+
+    $a = jq2(id).find('li a')
+    aRefs = $a.toArray().map(a => $(a).attr('href'))
+    newLiLen = jq2(id).find('li').length
+
+    expect(newLiLen).toEqual(currLiLen - 1)
+    expect(aRefs).not.toContain(`/${projectRepo}/${refs[1]}`)
+    currLiLen -= 1
+
+    // Remove the third time
+    rmIndex(outPath, refs[2])
+
+    const [, jq3] = preprocess(outPath)
+
+    $a = jq3(id).find('li a')
+    aRefs = $a.toArray().map(a => $(a).attr('href'))
+    newLiLen = jq3(id).find('li').length
+
+    expect(newLiLen).toEqual(currLiLen - 1)
+    expect(newLiLen).toEqual(0)
+    expect(aRefs).not.toContain(`/${projectRepo}/${refs[2]}`)
+    currLiLen -= 1
   })
 })
