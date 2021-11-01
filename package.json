@@ -21,8 +21,10 @@
     "debug": "yarn build; node --inspect-brk dist/index.js",
     "lint": "yarn eslint src/ --ext .js,.jsx,.ts,.tsx",
     "test": "yarn jest",
-    "build": "yarn tsc",
-    "esbuild-node": "yarn esbuild src/index.ts --minify --bundle --platform=node --sourcemap=external --outfile=dist/esbuild/index.js",
+    "build:copy-tpl": "cp -rf src/templates dist/tsc",
+    "build": "yarn tsc && yarn build:copy-tpl",
+    "esbuild-node:copy-tpl": "cp -rf src/templates dist/esbuild",
+    "esbuild-node": "node esbuild.js && yarn esbuild-node:copy-tpl",
     "build:all": "yarn clean && yarn build && yarn esbuild-node"
   },
   "dependencies": {
