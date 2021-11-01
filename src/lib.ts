@@ -1,12 +1,11 @@
 // Load order is important here. Need to load `jsdom` and `jsdom-global` first, then `cash-dom`
 // can be used, as it expects a browser environment with `window` and `document`.
-import jQueryFactory = require('jquery')
-// Internal Import
-import { TPL_PATH, CliUpsertOptions } from './consts_types'
+import fs = require('fs')
+import ejs = require('ejs')
 
-const { JSDOM } = require('jsdom')
-const fs = require('fs')
-const ejs = require('ejs')
+// Internal Import
+import { preprocess } from './utils'
+import { TPL_PATH, CliUpsertOptions } from './consts_types'
 
 // Constant definition
 const RUSTDOC_LIST_ID = '#rustdoc-list'
@@ -34,12 +33,12 @@ export function upsertIndex (
 
   // Remove the existing latest alias if needed
   if (latest && $(LATEST_DOM_ID).length > 0) {
-    $(LATEST_DOM_ID).each((ind, el) => { el.outerHTML = '' })
+    $(LATEST_DOM_ID).each((_ind, el) => { el.outerHTML = '' })
   }
 
   // Check if such <li /> child exists already
   const ul = $(RUSTDOC_LIST_ID).first()
-  const children = ul.children('li').filter((ind, li) =>
+  const children = ul.children('li').filter((_ind, li) =>
     $(li).children(`a[href$="/${ghRepo}/${ref}"]`).length > 0
   )
 
@@ -49,7 +48,7 @@ export function upsertIndex (
     : children.replaceWith(renderLi(ghRepo, ref, display, latest))
 
   // sort the `ul` children
-  const sortedLiArr = Array.from(ul.get(0)!.children)
+  const sortedLiArr = Array.from((ul.get(0) as HTMLElement).children)
     .sort((el1, el2) => {
       const textEl1 = $(el1).text().toLowerCase()
       const textEl2 = $(el2).text().toLowerCase()
@@ -69,27 +68,16 @@ export function rmIndex (inputPath: string, ref: string): void {
 
   // Check if such <li /> child exists already
   const ul = $(RUSTDOC_LIST_ID).first()
-  const children = ul.children('li').filter((ind, li) =>
+  const children = ul.children('li').filter((_ind, li) =>
     $(li).children(`a[href$="/${ghRepo}/${ref}"]`).length > 0
   )
 
-  children.each((ind, li) => { li.outerHTML = '' })
+  children.each((_ind, li) => { li.outerHTML = '' })
   // Save back to the file
   fs.writeFileSync(inputPath, jsdom.serialize())
 }
 
-function preprocess (inputPath: string): [any, JQueryStatic] {
-  if (!fs.existsSync(inputPath)) {
-    throw new Error(`input file ${inputPath} does not exist`)
-  }
-
-  const inputStr = fs.readFileSync(inputPath)
-  const jsdom = new JSDOM(inputStr)
-  const jQuery = jQueryFactory(jsdom.window, true)
-  return [jsdom, jQuery]
-}
-
-function renderLi (repo: string, ref: string, display: string, latest: boolean = false) {
+function renderLi (repo: string, ref: string, display: string, latest = false): string {
   return latest
     ? `<li><a href="/${repo}/${ref}">${display}</a><span id="latest"> (<a href="/${repo}/latest">latest</a>)</span></li>`
     : `<li><a href="/${repo}/${ref}">${display}</a></li>`
