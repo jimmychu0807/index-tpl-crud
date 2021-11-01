@@ -6,4 +6,4 @@ export interface CliUpsertOptions {
   latest: boolean
 }
 
-export const VERSION = '0.0.3'
+export const VERSION = '0.1.3'

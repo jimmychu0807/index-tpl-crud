@@ -19,7 +19,7 @@ const jsdomPatch = {
 require('esbuild').build({
   entryPoints: ['src/index.ts'],
   bundle: true,
-  // minify: true,
+  minify: true,
   platform: 'node',
   target: 'node14',
   sourcemap: 'external',
