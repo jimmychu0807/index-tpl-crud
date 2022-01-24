@@ -1,19 +1,19 @@
 {
-  "name": "@jimmychu0807/index-tpl-crud",
-  "version": "0.1.3",
+  "name": "@substrate/index-tpl-crud",
+  "version": "0.1.4",
   "description": "Script to update index.html of Parity projects that publish their rustdocs in github.",
-  "packageManager": "yarn@3.0.2",
+  "packageManager": "yarn@3.1.1",
   "main": "src/index.js",
-  "homepage": "https://github.com/jimmychu0807/index-tpl-crud",
+  "homepage": "https://github.com/substrate-developer-hub/index-tpl-crud",
   "repository": {
-    "url": "git+https://github.com/jimmychu0807/index-tpl-crud.git",
+    "url": "git+https://github.com/substrate-developer-hub/index-tpl-crud.git",
     "type": "git"
   },
   "bin": "dist/esbuild/index.js",
   "files": [
     "dist/**/*"
   ],
-  "author": "Jimmy Chu <jimmychu0807@gmail.com>",
+  "author": "Substrate Devhub <admin@substrate.io>",
   "license": "WTFPL",
   "scripts": {
     "clean": "rm -rf dist",
@@ -55,6 +55,6 @@
     "typescript": "^4.4.4"
   },
   "bugs": {
-    "url": "https://github.com/jimmychu0807/index-tpl-crud/issues"
+    "url": "https://github.com/substrate-developer-hub/index-tpl-crud/issues"
   }
 }
