@@ -4,9 +4,9 @@
   "description": "Script to update index.html of Parity projects that publish their rustdocs in github.",
   "packageManager": "yarn@3.1.1",
   "main": "src/index.js",
-  "homepage": "https://github.com/substrate-developer-hub/index-tpl-crud",
+  "homepage": "https://github.com/paritytech/index-tpl-crud",
   "repository": {
-    "url": "git+https://github.com/substrate-developer-hub/index-tpl-crud.git",
+    "url": "git+https://github.com/paritytech/index-tpl-crud.git",
     "type": "git"
   },
   "bin": "dist/esbuild/index.js",
@@ -55,6 +55,6 @@
     "typescript": "^4.4.4"
   },
   "bugs": {
-    "url": "https://github.com/substrate-developer-hub/index-tpl-crud/issues"
+    "url": "https://github.com/paritytech/index-tpl-crud/issues"
   }
 }

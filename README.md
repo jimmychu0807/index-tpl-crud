@@ -29,9 +29,9 @@ Commands:
     index-tpl-crud init substrate Substrate index.html
     ```
 
-    - `<ghRepo>`: Required. This is the name of the repository without the user /
-      organization name. So for Substrate with URL at `https://github.com/paritytech/substrate`,
-      use `substrate`.
+    - `<ghRepo>`: Required. This is the name of the repository without the Github user or
+      organization name.
+      So for Substrate with repo url at https://github.com/paritytech/substrate, use `substrate`.
     - `<projectName>`: Required. Project name it will display as.
     - `[outputPath]`: Optional. The output. If unspecified, it will be `index.html`.
 
@@ -54,3 +54,6 @@ Commands:
     ```
 
     parameters similar to `upsert` sub-command.
+
+4. Modify [`src/templates/template.ejs`](./src/templates/template.ejs) to update the style of the generated index page using `init`.
+  `upsert` and `rm` subcommands do not update the page style and only update the DOM tree within `#rustdoc-list` CSS ID.
